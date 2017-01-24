@@ -24,6 +24,13 @@ class TicTacToe:
         self.remaining_moves = 9
         self.game_over = False
 
+    def print_board(self):
+        print(" " + self.board[0][0] + " | " + self.board[0][1] + " | " + self.board[0][2])
+        print("-----------")
+        print(" " + self.board[1][0] + " | " + self.board[1][1] + " | " + self.board[1][2])
+        print("-----------")
+        print(" " + self.board[2][0] + " | " + self.board[2][1] + " | " + self.board[2][2])
+
     # returns GAMEOVER, PLACE_SUCCESS, and PLACE_FAIL
     def place(self, loc):
         if loc in self.location and (self.location[loc] != self.PLAYERX or self.location[loc] == self.PLAYERO):
@@ -36,7 +43,7 @@ class TicTacToe:
                 print()
                 self.print_board()
                 print()
-                print("Congratulations player" + self.current_player + ", you have won!")
+                print("Congratulations player " + self.current_player + ", you have won!")
                 self.game_over = True
                 return self.GAMEOVER
             elif status == self.TIE:
@@ -64,11 +71,30 @@ class TicTacToe:
     def check_victory(self):
         if self.remaining_moves == 0:
             return self.TIE
-
-        if False:
+        if self.check_victory_row() or self.check_victory_column() or self.check_victory_diagonal():
             return self.VICTORY
-
         return self.PLAY_ON
+
+    def check_victory_row(self):
+        for i in range(3):
+            if self.board[i][0] == self.board[i][1] and self.board[i][0] == self.board[i][2]:
+                return True
+
+        return False
+
+    def check_victory_column(self):
+        for i in range(3):
+            if self.board[0][i] == self.board[1][i] and self.board[0][i] == self.board[2][i]:
+                return True
+
+        return False
+
+    def check_victory_diagonal(self):
+        if (self.board[0][0] == self.board[1][1] and self.board[0][0] == self.board[2][2]) or \
+                (self.board[0][2] == self.board[1][1] and self.board[0][2] == self.board[2][0]):
+            return True
+
+        return False
 
     def start_game(self):
         print("Starting TicTacToe")
@@ -88,15 +114,6 @@ class TicTacToe:
             print()
             self.print_board()
             print()
-
-
-    def print_board(self):
-        print(" " + self.board[0][0] + " | " + self.board[0][1] + " | " + self.board[0][2])
-        print("-----------")
-        print(" " + self.board[1][0] + " | " + self.board[1][1] + " | " + self.board[1][2])
-        print("-----------")
-        print(" " + self.board[2][0] + " | " + self.board[2][1] + " | " + self.board[2][2])
-
 
 if __name__ == "__main__":
     game = TicTacToe()
