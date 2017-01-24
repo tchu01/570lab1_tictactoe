@@ -96,6 +96,16 @@ class TicTacToe:
 
         return False
 
+    def mini_max(self, level, current_player, alpha, beta):
+        # if current_player == PLAYERO
+            # find all available moves (children of current state)
+
+        # if current_player == PLAYERX
+            # find all available moves (children of current state)
+
+        print("Minimax alpha-beta")
+
+
     def start_game(self):
         print("Starting TicTacToe")
         print()
@@ -114,6 +124,10 @@ class TicTacToe:
             print()
             self.print_board()
             print()
+
+            # self.mini_max()
+
+
 
 if __name__ == "__main__":
     game = TicTacToe()
