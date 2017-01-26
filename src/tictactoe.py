@@ -7,7 +7,6 @@ class TicTacToe:
     PLACE_FAIL = 0
     PLACE_SUCCESS = 1
     GAMEOVER = 2
-
     TIE = 3
     VICTORY = 4
     PLAY_ON = 5
@@ -27,62 +26,27 @@ class TicTacToe:
         self.remaining_moves = 9
         self.game_over = False
 
-    def print_board(self):
-        '''
-        Prints the current game state's board.
-        '''
-
-        print(" " + self.board[0][0] + " | " + self.board[0][1] + " | " + self.board[0][2])
+    def print_board(self, board):
+        print(" " + board[0][0] + " | " + board[0][1] + " | " + board[0][2])
         print("-----------")
-        print(" " + self.board[1][0] + " | " + self.board[1][1] + " | " + self.board[1][2])
+        print(" " + board[1][0] + " | " + board[1][1] + " | " + board[1][2])
         print("-----------")
-        print(" " + self.board[2][0] + " | " + self.board[2][1] + " | " + self.board[2][2])
-
-    def place(self, loc):
-        '''
-        Places the mark on the current game state's board.
-        If game resulted in victory, prints victor.
-        If game resulted in tie, prints tie.
-        In both games, self.game_over is set to True.
-
-
-        :param loc: the location to place the mark
-        :return: GAMEOVER | PLACE_SUCCESS | PLACE_FAIL
-        '''
-
-        if loc in self.location and (self.location[loc] != self.PLAYERX or self.location[loc] == self.PLAYERO):
-            board_loc = self.location[loc]
-            self.board[board_loc[0]][board_loc[1]] = self.current_player
-            self.remaining_moves -= 1
-
-            status = self.check_victory(self.remaining_moves, self.board)
-            if status == self.VICTORY:
-                print()
-                self.print_board()
-                print()
-                print("Congratulations player " + self.current_player + ", you have won!")
-                self.game_over = True
-                return self.GAMEOVER
-            elif status == self.TIE:
-                print()
-                self.print_board()
-                print()
-                print("Aw, its a tie")
-                self.game_over = True
-                return self.GAMEOVER
-
-            self.current_player = self.switch_player(self.current_player)
-            return self.PLACE_SUCCESS
-        else:
-            print('Position is already taken or is invalid! ')
-            print()
-            return self.PLACE_FAIL
+        print(" " + board[2][0] + " | " + board[2][1] + " | " + board[2][2])
 
     def switch_player(self, player):
         if player == self.PLAYERX:
             return self.PLAYERO
         else:
             return self.PLAYERX
+
+    def possible_moves(self, board):
+        ret = []
+        for i in range(3):
+            for j in range(3):
+                if board[i][j] is not self.PLAYERX and board[i][j] is not self.PLAYERO:
+                    ret.append(board[i][j])
+
+        return ret
 
     def check_victory(self, remaining_moves, board):
         '''
@@ -121,8 +85,52 @@ class TicTacToe:
 
         return False
 
+    def is_loc_open(self, board, loc):
+        board_loc = self.location[loc]
+        if board[board_loc[0]][board_loc[1]] == self.PLAYERO or board[board_loc[0]][board_loc[1]] == self.PLAYERX:
+            return False
+
+        return True
+
+    def place(self, loc):
+        '''
+        Places the mark on the current game state's board.
+        If game resulted in victory, prints victor.
+        If game resulted in tie, prints tie.
+        In both cases, self.game_over is set to True.
 
 
+        :param loc: the location to place the mark
+        :return: GAMEOVER | PLACE_SUCCESS | PLACE_FAIL
+        '''
+
+        if loc in self.location and self.is_loc_open(self.board, loc):
+            board_loc = self.location[loc]
+            self.board[board_loc[0]][board_loc[1]] = self.current_player
+            self.remaining_moves -= 1
+
+            status = self.check_victory(self.remaining_moves, self.board)
+            if status == self.VICTORY:
+                print()
+                self.print_board(self.board)
+                print()
+                print("Congratulations player " + self.current_player + ", you have won!")
+                self.game_over = True
+                return self.GAMEOVER
+            elif status == self.TIE:
+                print()
+                self.print_board(self.board)
+                print()
+                print("Aw, its a tie")
+                self.game_over = True
+                return self.GAMEOVER
+
+            self.current_player = self.switch_player(self.current_player)
+            return self.PLACE_SUCCESS
+        else:
+            print('Position is already taken or is invalid!')
+            print()
+            return self.PLACE_FAIL
 
     def alpha_beta(self, board, current_player, alpha, beta):
         possible_moves = self.possible_moves(board)
@@ -130,76 +138,57 @@ class TicTacToe:
         status = self.check_victory(len(possible_moves), board)
         if status == self.VICTORY:
             if current_player == self.PLAYERO:
-                return -10;
+                return -10, None
             else:
-                return 10;
+                return 10, None
         elif status == self.TIE:
-            return 0;
+            return 0, None
 
         if current_player == self.PLAYERO:
             # print("PLAYER0 making a move")
+            best_move = None
             for move in possible_moves:
                 new_board = copy.deepcopy(board)
                 board_loc = self.location[move]
                 new_board[board_loc[0]][board_loc[1]] = current_player
-                # self.print_passed_board(new_board)
+                # self.print_board(new_board)
                 # print()
 
-                score = self.alpha_beta(new_board, self.switch_player(current_player), alpha, beta)
+                (score, scored_move) = self.alpha_beta(new_board, self.switch_player(current_player), alpha, beta)
                 # print("score: " + str(score))
                 if score > alpha:
+                    best_move = move
                     # print("alpha = score")
                     alpha = score
                 if alpha >= beta:
                     # print("alpha >= beta")
-                    return alpha;
+                    return (alpha, best_move)
 
-            return alpha
+            return (alpha, best_move)
         else:
             # print("PLAYERX making a move")
             for move in possible_moves:
                 new_board = copy.deepcopy(board)
                 board_loc = self.location[move]
                 new_board[board_loc[0]][board_loc[1]] = current_player
-                # self.print_passed_board(new_board)
+                # self.print_board(new_board)
                 # print()
 
-                score = self.alpha_beta(new_board, self.switch_player(current_player), alpha, beta)
+                (score, scored_move) = self.alpha_beta(new_board, self.switch_player(current_player), alpha, beta)
                 # print("score: " + str(score))
                 if score < beta:
                     # print("beta = score")
                     beta = score
                 if alpha >= beta:
                     # print("alpha >= beta")
-                    return beta;
+                    return (beta, None)
 
-            return beta
-
-    def possible_moves(self, board):
-        ret = []
-        for i in range(3):
-            for j in range(3):
-                if board[i][j] is not self.PLAYERX and board[i][j] is not self.PLAYERO:
-                    ret.append(board[i][j])
-
-        return ret
-
-    def print_passed_board(self, board):
-        '''
-        Prints the passed in board.
-        '''
-
-        print(" " + board[0][0] + " | " + board[0][1] + " | " + board[0][2])
-        print("-----------")
-        print(" " + board[1][0] + " | " + board[1][1] + " | " + board[1][2])
-        print("-----------")
-        print(" " + board[2][0] + " | " + board[2][1] + " | " + board[2][2])
-
+            return (beta, None)
 
     def start_game(self):
         print("Starting TicTacToe")
         print()
-        self.print_board()
+        self.print_board(self.board)
         print()
 
         while not self.game_over:
@@ -212,18 +201,20 @@ class TicTacToe:
                     return
 
             print()
-            self.print_board()
+            self.print_board(self.board)
             print()
 
             inf = math.inf
-            print("ALPHA_BETA")
-            score = self.alpha_beta(self.board, self.current_player, -inf, inf)
-            print(score)
+            print("ALPHA_BETA MINIMAX making decision for player " + self.current_player)
+            score, scored_move = self.alpha_beta(self.board, self.current_player, -inf, inf)
+            cont = self.place(scored_move)
+            if cont == self.GAMEOVER:
+                return
 
-            # self.place(score[1])
-            # print()
-            # self.print_board()
-            # print()
+            print()
+            self.print_board(self.board)
+            print()
+
 
 
 if __name__ == "__main__":
