@@ -204,7 +204,7 @@ class TicTacToe:
             self.print_board(self.board)
             print()
 
-            inf = math.inf
+            inf = float('inf')
             print("ALPHA_BETA MINIMAX making decision for player " + self.current_player)
             score, scored_move = self.alpha_beta(self.board, self.current_player, -inf, inf)
             cont = self.place(scored_move)
